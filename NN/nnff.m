@@ -17,6 +17,8 @@ function nn = nnff(nn, x, y)
                 nn.a{i} = sigm(nn.a{i - 1} * nn.W{i - 1}');
             case 'tanh_opt'
                 nn.a{i} = tanh_opt(nn.a{i - 1} * nn.W{i - 1}');
+            case 'relu'
+                nn.a{i} = max(0, nn.a{i - 1} * nn.W{i - 1}');
         end
         
         %dropout
@@ -46,13 +48,15 @@ function nn = nnff(nn, x, y)
             nn.a{n} = nn.a{n - 1} * nn.W{n - 1}';
             nn.a{n} = exp(bsxfun(@minus, nn.a{n}, max(nn.a{n},[],2)));
             nn.a{n} = bsxfun(@rdivide, nn.a{n}, sum(nn.a{n}, 2)); 
+        case 'relu'
+            nn.a{n} = max(0, nn.a{n - 1} * nn.W{n - 1}');
     end
 
     %error and loss
     nn.e = y - nn.a{n};
     
     switch nn.output
-        case {'sigm', 'linear'}
+        case {'sigm', 'linear', 'relu'}
             nn.L = 1/2 * sum(sum(nn.e .^ 2)) / m; 
         case 'softmax'
             nn.L = -sum(sum(y .* log(nn.a{n}))) / m;

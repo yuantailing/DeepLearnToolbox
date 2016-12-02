@@ -7,7 +7,7 @@ function nn = nnbp(nn)
     switch nn.output
         case 'sigm'
             d{n} = - nn.e .* (nn.a{n} .* (1 - nn.a{n}));
-        case {'softmax','linear'}
+        case {'softmax', 'linear', 'relu'}
             d{n} = - nn.e;
     end
     for i = (n - 1) : -1 : 2
@@ -17,6 +17,8 @@ function nn = nnbp(nn)
                 d_act = nn.a{i} .* (1 - nn.a{i});
             case 'tanh_opt'
                 d_act = 1.7159 * 2/3 * (1 - 1/(1.7159)^2 * nn.a{i}.^2);
+            case 'relu'
+                d_act = single(nn.a{i} > 0);
         end
         
         if(nn.nonSparsityPenalty>0)
